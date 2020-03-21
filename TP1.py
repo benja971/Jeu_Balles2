@@ -8,14 +8,14 @@ fenetre=pygame.display.set_mode((largeur,hauteur))
 
 def images(font, font2):
 	bank = {}
-	bank["imageFondJeu"] = pygame.image.load("background.jpg").convert_alpha(),
-	bank["imageFondM"] = pygame.image.load("BackgroundM.png").convert_alpha(),
-	bank["perso"] = pygame.image.load("perso.png").convert_alpha(),
-	bank["bonus"] = pygame.image.load("bonus.png").convert_alpha(),
-	bank["coeur"] = pygame.image.load("coeur.png").convert_alpha(),
-	bank["mort"] = pygame.image.load("mort.png").convert_alpha(),
-	bank["balle"] = pygame.image.load("balle.png").convert_alpha(),
-	bank["play"] = font2.render("Play", 1, (255, 0, 0)),
+	bank["imageFondJeu"] = pygame.image.load("background.jpg")
+	bank["imageFondM"] = pygame.image.load("BackgroundM.png")
+	bank["perso"] = pygame.image.load("perso.png")
+	bank["bonus"] = pygame.image.load("bonus.png")
+	bank["coeur"] = pygame.image.load("coeur.png")
+	bank["mort"] = pygame.image.load("mort.png")
+	bank["balle"] = pygame.image.load("balle.png")
+	bank["play"] = font2.render("Play", 1, (255, 0, 0))
 	bank["exit"] = font2.render("Exit", 1, (255, 0, 0))
 	return bank
 
