@@ -4,20 +4,22 @@ from random import randint, random
 
 pygame.init()
 
-largeur, hauteur = 640, 480
-fenetre=pygame.display.set_mode((largeur,hauteur))
+largeur, hauteur = 1920, 1080
+fenetre=pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
+
+scores = {}
 
 def images(font, font2):
 	bank = {}
 	bank["imageFondJeu"] = pygame.image.load("background.jpg")
-	bank["imageFondM"] = pygame.image.load("BackgroundM.png")
-	bank["perso"] = pygame.image.load("perso.png")
-	bank["bonus"] = pygame.image.load("bonus.png")
-	bank["coeur"] = pygame.image.load("coeur.png")
-	bank["mort"] = pygame.image.load("mort.png")
-	bank["balle"] = pygame.image.load("balle.png")
-	bank["play"] = font2.render("Play", 1, (255, 0, 0))
-	bank["exit"] = font2.render("Exit", 1, (255, 0, 0))
+	bank["imageFondM"] = pygame.image.load("BackgroundM.png").convert_alpha()
+	bank["perso"] = pygame.image.load("perso.png").convert_alpha()
+	bank["bonus"] = pygame.image.load("bonus.png").convert_alpha()
+	bank["coeur"] = pygame.image.load("coeur.png").convert_alpha()
+	bank["mort"] = pygame.image.load("mort.png").convert_alpha()
+	bank["balle"] = pygame.image.load("balle.png").convert_alpha()
+	bank["play"] = font2.render("Play", 1, (255, 0, 0)).convert_alpha()
+	bank["exit"] = font2.render("Exit", 1, (255, 0, 0)).convert_alpha()
 	return bank
 
 class ElementGraphique():
@@ -35,17 +37,17 @@ class ElementGraphique():
 class Perso(ElementGraphique):
 	def __init__(self, img, x, y, largeur, hauteur):
 		ElementGraphique.__init__(self, img, x, y)
-		self.vie = 3
-		self.vitesse = 5
+		self.vie = 1
+		self.vitesse = 10
 
 	def Deplacer(self, touches):
-		if touches[pygame.K_RIGHT] and self.rect.x <= largeur-self.rect.w:
+		if touches[pygame.K_d] and self.rect.x <= largeur-self.rect.w:
 			self.rect.x += self.vitesse
-		if touches[pygame.K_LEFT] and self.rect.x >= 0:
+		if touches[pygame.K_a] and self.rect.x >= 0:
 			self.rect.x -= self.vitesse
-		if touches[pygame.K_UP] and self.rect.y >= 0:
+		if touches[pygame.K_w] and self.rect.y >= 0:
 			self.rect.y -= self.vitesse
-		if touches[pygame.K_DOWN] and self.rect.y <= hauteur-self.rect.h:
+		if touches[pygame.K_s] and self.rect.y <= hauteur-self.rect.h:
 			self.rect.y += self.vitesse
 
 	def enVie(self):
@@ -143,8 +145,8 @@ state = "Menu"
 enemys = []
 
 while continuer:
-
-	horloge.tick(60)
+	print(horloge)
+	horloge.tick(30)
 	i+=1
 
 	touches = pygame.key.get_pressed()
@@ -158,6 +160,8 @@ while continuer:
 
 	if state == "Menu":
 
+		perso.vie = 1
+		secondes = 0
 		fondmenu.Afficher(fenetre)
 		Play.Afficher(fenetre)
 		Exit.Afficher(fenetre)
@@ -179,16 +183,16 @@ while continuer:
 		if i %150 == 0:
 			nbr = random()
 			if 0 <= nbr < 0.5:
-				enemys.append(Enemys(bank["balle"] ,randint(0, largeur), randint(0, hauteur), 0, randint(1, 4), randint(1, 10)))
+				enemys.append(Enemys(bank["balle"] ,randint(0, largeur), randint(0, hauteur), 0, randint(1, 4), randint(5, 15)))
 
 			if 0.5 <= nbr < 0.7:
-				enemys.append(Enemys(bank["bonus"] ,randint(0, largeur), randint(0, hauteur), 1, randint(1, 4), randint(1, 10)))
+				enemys.append(Enemys(bank["bonus"] ,randint(0, largeur), randint(0, hauteur), 1, randint(1, 4), randint(5, 15)))
 
 			if 0.7 <= nbr < 0.85:
-				enemys.append(Enemys(bank["mort"],randint(0, largeur), randint(0, hauteur), 2, randint(1, 4), randint(1, 10)))
+				enemys.append(Enemys(bank["mort"],randint(0, largeur), randint(0, hauteur), 2, randint(1, 4), randint(5, 15)))
 
 			if 0.85 <= nbr <= 1:
-				enemys.append(Enemys(bank["coeur"],randint(0, largeur), randint(0, hauteur), 3, randint(1, 4), randint(1, 10)))
+				enemys.append(Enemys(bank["coeur"],randint(0, largeur), randint(0, hauteur), 3, randint(1, 4), randint(5, 15)))
 
 
 		fondjeu.Afficher((fenetre))
@@ -203,9 +207,16 @@ while continuer:
 		else:
 			state = "Menu"
 
+			name = input("Quel est votre nom: ")
+			scores.update({name: str(secondes) + " secondes"})
+
+			print(scores)
+
+			with open('data.json', 'w') as fp:
+   				json.dump(scores, fp, indent=4)
+
 		for balle in enemys:
 			balle.Afficher((fenetre))
-			# balle.CheckSkins()
 			balle.Deplacer()
 			balle.Collisions(perso)
 
