@@ -111,6 +111,20 @@ class Enemys(ElementGraphique):
 				Perso.vie += 1
 
 
+def NewBalle(enemys):
+	nbr = random()
+	if 0 <= nbr < 0.5:
+		enemys.append(Enemys(bank["balle"] ,randint(0, largeur), randint(0, hauteur), 0, randint(1, 4), randint(5, 15)))
+
+	if 0.5 <= nbr < 0.7:
+		enemys.append(Enemys(bank["bonus"] ,randint(0, largeur), randint(0, hauteur), 1, randint(1, 4), randint(5, 15)))
+
+	if 0.7 <= nbr < 0.85:
+		enemys.append(Enemys(bank["mort"],randint(0, largeur), randint(0, hauteur), 2, randint(1, 4), randint(5, 15)))
+
+	if 0.85 <= nbr <= 1:
+		enemys.append(Enemys(bank["coeur"],randint(0, largeur), randint(0, hauteur), 3, randint(1, 4), randint(5, 15)))
+
 font = pygame.font.Font(None, 30)
 font2 = pygame.font.Font(None, 70)
 bank = images(font, font2)
@@ -167,19 +181,8 @@ while continuer:
 		if i %60 == 0:
 			secondes += 1
 
-		if i %150 == 0:
-			nbr = random()
-			if 0 <= nbr < 0.5:
-				enemys.append(Enemys(bank["balle"] ,randint(0, largeur), randint(0, hauteur), 0, randint(1, 4), randint(5, 15)))
-
-			if 0.5 <= nbr < 0.7:
-				enemys.append(Enemys(bank["bonus"] ,randint(0, largeur), randint(0, hauteur), 1, randint(1, 4), randint(5, 15)))
-
-			if 0.7 <= nbr < 0.85:
-				enemys.append(Enemys(bank["mort"],randint(0, largeur), randint(0, hauteur), 2, randint(1, 4), randint(5, 15)))
-
-			if 0.85 <= nbr <= 1:
-				enemys.append(Enemys(bank["coeur"],randint(0, largeur), randint(0, hauteur), 3, randint(1, 4), randint(5, 15)))
+		if i %75 == 0:
+			NewBalle(enemys)
 
 
 		fondjeu.Afficher((fenetre))
