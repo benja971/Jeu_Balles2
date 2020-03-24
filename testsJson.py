@@ -1,6 +1,28 @@
 import json
 
-dict = {"member #002":{"first name": "John", "last name": "Doe", "age": 34},
-        "member #003":{"first name": "Elijah", "last name": "Baley", "age": 27},
-        "member #001":{"first name": "Jane", "last name": "Doe", "age": 42}}
+with open('data.json') as json_data:
+        scores = json.load(json_data)
+        
+name = input("Nom: ")
+score = input("Score: ")
 
+if name not in scores:
+        scores.update({name: str(score)})
+
+if int(scores[str(name)]) < int(score):
+        scores.update({name: str(score)})
+
+s = []
+
+for sc in scores:
+     s.append(int(scores[sc]))
+
+s = sorted(s)
+
+scores.update({"Best score": (s[-1])})  
+
+with open('data.json', 'w') as fp:
+	json.dump(scores, fp, indent=4)
+
+
+                
