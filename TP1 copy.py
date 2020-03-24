@@ -11,13 +11,13 @@ scores = {}
 
 def images(font, font2):
 	bank = {}
-	bank["imageFondJeu"] = pygame.image.load("background.jpg")
-	bank["imageFondM"] = pygame.image.load("test.jpg").convert_alpha()
-	bank["perso"] = pygame.image.load("perso.png").convert_alpha()
-	bank["bonus"] = pygame.image.load("bonus.png").convert_alpha()
-	bank["coeur"] = pygame.image.load("coeur.png").convert_alpha()
-	bank["mort"] = pygame.image.load("mort.png").convert_alpha()
-	bank["balle"] = pygame.image.load("balle.png").convert_alpha()
+	bank["imageFondJeu"] = pygame.image.load("images/background.jpg")
+	bank["imageFondM"] = pygame.image.load("images/test.jpg").convert_alpha()
+	bank["perso"] = pygame.image.load("images/perso.png").convert_alpha()
+	bank["bonus"] = pygame.image.load("images/bonus.png").convert_alpha()
+	bank["coeur"] = pygame.image.load("images/coeur.png").convert_alpha()
+	bank["mort"] = pygame.image.load("images/mort.png").convert_alpha()
+	bank["balle"] = pygame.image.load("images/balle.png").convert_alpha()
 	bank["play"] = font2.render("Play", 1, (255, 0, 0)).convert_alpha()
 	bank["exit"] = font2.render("Exit", 1, (255, 0, 0)).convert_alpha()		
 	return bank
