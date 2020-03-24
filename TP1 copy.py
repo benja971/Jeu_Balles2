@@ -1,15 +1,31 @@
 import pygame
 import json
 from random import randint, random
+from ctypes import windll
+windll.shcore.SetProcessDpiAwareness(1)
 
 pygame.init()
 
 largeur, hauteur = 1920, 1080
-fenetre=pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
+# fenetre = pygame.display.set_mode((largeur,hauteur))
+fenetre = pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
 
 scores = {}
 
 def images(font, font2):
+<<<<<<< HEAD
+	files = [
+		"imageFondJeu.jpg",
+		"imageFondM.jpg",
+		"perso.png",
+		"bonus.png",
+		"coeur.png",
+		"mort.png",
+		"balle.png"
+	]
+
+	bank = {file.split('.')[0]: pygame.image.load('images/' + file).convert_alpha() for file in files}
+=======
 	bank = {}
 	bank["imageFondJeu"] = pygame.image.load("images/background.jpg")
 	bank["imageFondM"] = pygame.image.load("images/test.jpg").convert_alpha()
@@ -18,6 +34,7 @@ def images(font, font2):
 	bank["coeur"] = pygame.image.load("images/coeur.png").convert_alpha()
 	bank["mort"] = pygame.image.load("images/mort.png").convert_alpha()
 	bank["balle"] = pygame.image.load("images/balle.png").convert_alpha()
+>>>>>>> master
 	bank["play"] = font2.render("Play", 1, (255, 0, 0)).convert_alpha()
 	bank["exit"] = font2.render("Exit", 1, (255, 0, 0)).convert_alpha()		
 	return bank
@@ -36,7 +53,7 @@ class ElementGraphique():
 	
 class Perso(ElementGraphique):
 	def __init__(self, img, x, y):
-		ElementGraphique.__init__(self, img, x, y)
+		super(Perso, self).__init__(img, x, y)
 		self.vie = 1
 		self.vitesse = 10
 
@@ -58,7 +75,7 @@ class Perso(ElementGraphique):
 
 class Enemys(ElementGraphique):
 	def __init__(self, img, x, y, pouvoir, v):
-		ElementGraphique.__init__(self, img, x, y)
+		super(Enemys, self).__init__(img, x, y)
 		self.vx = v
 		self.vy = v
 		self.reb = 0
@@ -187,18 +204,20 @@ while continuer:
 		
 		else:
 			state = "Menu"
-
+			pygame.display.set_mode((largeur,hauteur))
+			pygame.display.iconify()
 			name = input("Quel est votre nom: ")
+			pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
 
 			with open('data.json') as json_data:
-					scores = json.load(json_data)
-					scores.update({"Best score": 0})
+				scores = json.load(json_data)
+				scores.update({"Best score": 0})
 					
 			if name not in scores:
-					scores.update({name: str(secondes)})
+				scores.update({name: str(secondes)})
 
 			if int(scores[str(name)]) < int(secondes):
-					scores.update({name: str(secondes)})
+				scores.update({name: str(secondes)})
 
 			s = []
 
@@ -214,9 +233,9 @@ while continuer:
 
 		for balle in enemys:
 			balle.Afficher((fenetre))
-			balle.Deplacer(Perso)
+			balle.Deplacer(perso)
 			balle.Collisions(perso)
 
-	pygame.display.flip()
+	pygame.display.update()
 
 pygame.quit()
