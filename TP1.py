@@ -184,7 +184,6 @@ while continuer:
 		if i %75 == 0:
 			NewBalle(enemys)
 
-
 		fondjeu.Afficher((fenetre))
 		perso.Afficher((fenetre))
 		perso.Deplacer(touches)

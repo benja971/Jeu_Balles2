@@ -1,5 +1,6 @@
 import pygame
 import json
+from tkinter import *
 from random import randint, random
 from ctypes import windll
 windll.shcore.SetProcessDpiAwareness(1)
@@ -7,13 +8,12 @@ windll.shcore.SetProcessDpiAwareness(1)
 pygame.init()
 
 largeur, hauteur = 1920, 1080
-# fenetre = pygame.display.set_mode((largeur,hauteur))
 fenetre = pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
+fen=Tk()
 
 scores = {}
 
 def images(font, font2):
-<<<<<<< HEAD
 	files = [
 		"imageFondJeu.jpg",
 		"imageFondM.jpg",
@@ -25,16 +25,6 @@ def images(font, font2):
 	]
 
 	bank = {file.split('.')[0]: pygame.image.load('images/' + file).convert_alpha() for file in files}
-=======
-	bank = {}
-	bank["imageFondJeu"] = pygame.image.load("images/background.jpg")
-	bank["imageFondM"] = pygame.image.load("images/test.jpg").convert_alpha()
-	bank["perso"] = pygame.image.load("images/perso.png").convert_alpha()
-	bank["bonus"] = pygame.image.load("images/bonus.png").convert_alpha()
-	bank["coeur"] = pygame.image.load("images/coeur.png").convert_alpha()
-	bank["mort"] = pygame.image.load("images/mort.png").convert_alpha()
-	bank["balle"] = pygame.image.load("images/balle.png").convert_alpha()
->>>>>>> master
 	bank["play"] = font2.render("Play", 1, (255, 0, 0)).convert_alpha()
 	bank["exit"] = font2.render("Exit", 1, (255, 0, 0)).convert_alpha()		
 	return bank
@@ -80,6 +70,7 @@ class Enemys(ElementGraphique):
 		self.vy = v
 		self.reb = 0
 		self.pouvoir = pouvoir
+		self.apparition = 0
 	
 	def Deplacer(self, perso):
 		if self.rect.x > perso.rect.x and self.vx > -5:
@@ -121,6 +112,33 @@ class Enemys(ElementGraphique):
 				enemys.remove(balle)
 				Perso.vie += 1
 
+def verif():
+	with open('data.json') as json_data:
+		scores = json.load(json_data)
+		scores.update({"Best score": 0})
+
+	if saisie.get() == "":
+		scores.update({"Unknown": str(secondes)})
+
+	if saisie.get() not in scores:
+		scores.update({saisie.get(): str(secondes)})
+
+	if int(scores[str(saisie.get())]) < int(secondes):
+		scores.update({saisie.get(): str(secondes)})
+
+	s = []
+
+	for sc in scores:
+		s.append(int(scores[sc]))
+
+	s = sorted(s)
+
+	scores.update({"Best score": (s[-1])}) 
+
+	with open('data.json', 'w') as fp:
+		json.dump(scores, fp, indent=4)
+    
+	fen.destroy()
 
 font = pygame.font.Font(None, 30)
 font2 = pygame.font.Font(None, 70)
@@ -143,6 +161,8 @@ state = "Menu"
 
 enemys = []
 
+select = pygame.Rect(1, 1, 0, 0)
+
 while continuer:
 	horloge.tick(30)
 	i+=1
@@ -160,6 +180,7 @@ while continuer:
 
 		perso.vie = 1
 		secondes = 0
+		enemys.clear()
 		fondmenu.Afficher(fenetre)
 		Play.Afficher(fenetre)
 		Exit.Afficher(fenetre)
@@ -204,32 +225,16 @@ while continuer:
 		
 		else:
 			state = "Menu"
-			pygame.display.set_mode((largeur,hauteur))
-			pygame.display.iconify()
-			name = input("Quel est votre nom: ")
-			pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
+			
+			texte=Label(fen, text='Veuillez entrer votre pseudo', width=30, height=3, fg="black")
+			texte.pack()
+			saisie=StringVar()
+			entree=Entry(fen,textvariable=saisie, width=30)
+			entree.pack()
+			bou1=Button(fen , text='Valider', command=verif)
+			bou1.pack()
+			fen.mainloop()
 
-			with open('data.json') as json_data:
-				scores = json.load(json_data)
-				scores.update({"Best score": 0})
-					
-			if name not in scores:
-				scores.update({name: str(secondes)})
-
-			if int(scores[str(name)]) < int(secondes):
-				scores.update({name: str(secondes)})
-
-			s = []
-
-			for sc in scores:
-				s.append(int(scores[sc]))
-
-			s = sorted(s)
-
-			scores.update({"Best score": (s[-1])}) 
-
-			with open('data.json', 'w') as fp:
-				json.dump(scores, fp, indent=4)
 
 		for balle in enemys:
 			balle.Afficher((fenetre))
