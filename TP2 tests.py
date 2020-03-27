@@ -110,7 +110,7 @@ class Enemys(ElementGraphique):
 				enemys.remove(balle)
 				Perso.vie += 1
 
-def verif():
+def verif(saisie):
 
 	with open('data.json') as json_data:
 		scores = json.load(json_data)
@@ -242,7 +242,6 @@ while continuer:
 			state = "Jeu"
 		
 		else:
-			state = "Menu"
 			pygame.display.set_mode((largeur,hauteur))
 			fen=Tk()
 			texte=Label(fen, text='Veuillez entrer votre pseudo', width=30, height=3, fg="black")
@@ -250,11 +249,11 @@ while continuer:
 			saisie=StringVar()
 			entree=Entry(fen,textvariable=saisie, width=30)
 			entree.pack()
-			bou1=Button(fen , text='Valider', command=verif)
+			bou1=Button(fen , text='Valider', command=lambda: verif(saisie))
 			bou1.pack()
 			fen.mainloop()
 			pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
-
+			state = "Menu"
 
 		for balle in enemys:
 			balle.Afficher((fenetre))
