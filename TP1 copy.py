@@ -9,9 +9,7 @@ pygame.init()
 
 largeur, hauteur = 1920, 1080
 fenetre = pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
-fen=Tk()
 
-scores = {}
 
 def images(font, font2):
 	files = [
@@ -25,8 +23,8 @@ def images(font, font2):
 	]
 
 	bank = {file.split('.')[0]: pygame.image.load('images/' + file).convert_alpha() for file in files}
-	bank["play"] = font2.render("Play", 1, (255, 0, 0)).convert_alpha()
-	bank["exit"] = font2.render("Exit", 1, (255, 0, 0)).convert_alpha()		
+	bank["play"] = font2.render("Play", 1, (255, 255, 255)).convert_alpha()
+	bank["exit"] = font2.render("Exit", 1, (255, 255, 255)).convert_alpha()		
 	return bank
 
 class ElementGraphique():
@@ -113,17 +111,26 @@ class Enemys(ElementGraphique):
 				Perso.vie += 1
 
 def verif():
+
 	with open('data.json') as json_data:
 		scores = json.load(json_data)
 		scores.update({"Best score": 0})
 
 	if saisie.get() == "":
-		scores.update({"Unknown": str(secondes)})
+		with open('trucs.json') as json_trucs:
+			n = json.load(json_trucs)
+			n+=1	
+	
+		with open('trucs.json', 'w') as fp:
+			json.dump(n, fp, indent=4)
 
-	if saisie.get() not in scores:
+		scores.update({"Unknown " + str(n): str(secondes)})
+		pass
+
+	if saisie.get() not in scores and saisie.get() != "":
 		scores.update({saisie.get(): str(secondes)})
 
-	if int(scores[str(saisie.get())]) < int(secondes):
+	if saisie.get() != "" and int(scores[str(saisie.get())]) < int(secondes):
 		scores.update({saisie.get(): str(secondes)})
 
 	s = []
@@ -133,15 +140,15 @@ def verif():
 
 	s = sorted(s)
 
-	scores.update({"Best score": (s[-1])}) 
-
+	scores.update({"Best score": (s[-1])})
+	
 	with open('data.json', 'w') as fp:
 		json.dump(scores, fp, indent=4)
-    
+
 	fen.destroy()
 
 font = pygame.font.Font(None, 30)
-font2 = pygame.font.Font(None, 70)
+font2 = pygame.font.Font(None, 100)
 bank = images(font, font2)
 
 fondjeu = ElementGraphique(bank["imageFondJeu"], 0, 0)
@@ -161,7 +168,7 @@ state = "Menu"
 
 enemys = []
 
-select = pygame.Rect(1, 1, 0, 0)
+xs, ys = 0, 0
 
 while continuer:
 	horloge.tick(30)
@@ -177,6 +184,7 @@ while continuer:
 			continuer = 0
 
 	if state == "Menu":
+		select = pygame.Rect(xs, ys, 1, 1)
 
 		perso.vie = 1
 		secondes = 0
@@ -185,8 +193,18 @@ while continuer:
 		Play.Afficher(fenetre)
 		Exit.Afficher(fenetre)
 
-		if touches[pygame.K_RETURN]:
-			state = "Jeu"
+		for event in pygame.event.get():
+			if event.type == pygame.MOUSEMOTION:
+				xs = event.pos[0]
+				ys = event.pos[1]
+
+
+			if select.colliderect(Play.rect) and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+				state = "Jeu"
+
+			if select.colliderect(Exit.rect) and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+				continuer = False
+
 
 	if state == "Jeu":
 
@@ -225,7 +243,8 @@ while continuer:
 		
 		else:
 			state = "Menu"
-			
+			pygame.display.set_mode((largeur,hauteur))
+			fen=Tk()
 			texte=Label(fen, text='Veuillez entrer votre pseudo', width=30, height=3, fg="black")
 			texte.pack()
 			saisie=StringVar()
@@ -234,6 +253,7 @@ while continuer:
 			bou1=Button(fen , text='Valider', command=verif)
 			bou1.pack()
 			fen.mainloop()
+			pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
 
 
 		for balle in enemys:
