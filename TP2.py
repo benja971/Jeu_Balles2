@@ -71,7 +71,7 @@ class Enemys(ElementGraphique):
 		self.rebmax = rebmax
 		self.apparition = i
 
-	def Deplacer(self):
+	def Deplacer(self, hauteur, largeur, enemys, balle):
 		rebond = False
 		if self.rect.y + self.rect.h >= hauteur:
 			self.vy = -abs(self.vy)
@@ -122,7 +122,7 @@ class Enemys(ElementGraphique):
 	
 			
 	
-	def Collisions(self, Perso):
+	def Collisions(self, Perso, enemys, balle):
 		if self.rect.colliderect(Perso.rect):
 			if self.pouvoir == 0:
 				enemys.remove(balle)
@@ -140,39 +140,21 @@ class Enemys(ElementGraphique):
 				Perso.vie += 1
 
 def verif(saisie):
+	with open('data.json') as f:
+		d = json.load(f)
 
-	with open('data.json') as json_data:
-		scores = json.load(json_data)
-		scores.update({"Best score": 0})
+		if saisie.get() == '':
+			n = len([k for k in d if 'Unknown' in k])
+			d[f'Unknown {n+1}'] = secondes
 
-	if saisie.get() == "":
-		with open('trucs.json') as json_trucs:
-			n = json.load(json_trucs)
-			n+=1	
-	
-		with open('trucs.json', 'w') as fp:
-			json.dump(n, fp, indent=4)
+		elif saisie.get() not in d or secondes > d[saisie.get()]:
+			d[saisie.get()] = secondes
+				
+		if secondes > d['Best score']:
+			d['Best score'] = secondes
 
-		scores.update({"Unknown " + str(n): str(secondes)})
-		pass
-
-	if saisie.get() not in scores and saisie.get() != "":
-		scores.update({saisie.get(): str(secondes)})
-
-	if saisie.get() != "" and int(scores[str(saisie.get())]) < int(secondes):
-		scores.update({saisie.get(): str(secondes)})
-
-	s = []
-
-	for sc in scores:
-		s.append(int(scores[sc]))
-
-	s = sorted(s)
-
-	scores.update({"Best score": (s[-1])})
-	
-	with open('data.json', 'w') as fp:
-		json.dump(scores, fp, indent=4)
+		with open('data.json', 'w') as f:
+			f.write(json.dumps(d, indent = 4))
 
 	fen.destroy()
 
@@ -273,14 +255,14 @@ while continuer:
 		else:
 			state = "Menu"
 			pygame.display.set_mode((largeur,hauteur))
+
 			fen=Tk()
-			texte=Label(fen, text='Veuillez entrer votre pseudo', width=30, height=3, fg="black")
-			texte.pack()
+
+			texte=Label(fen, text='Veuillez entrer votre pseudo', width=30, height=3, fg="black").pack()
 			saisie=StringVar()
-			entree=Entry(fen,textvariable=saisie, width=30)
-			entree.pack()
-			bou1=Button(fen , text='Valider', command=lambda: verif(saisie))
-			bou1.pack()
+			entree=Entry(fen,textvariable=saisie, width=30).pack()
+			bou1=Button(fen , text='Valider', command=lambda: verif(saisie)).pack()
+
 			fen.mainloop()
 			pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
 
@@ -289,11 +271,15 @@ while continuer:
 			balle.Afficher((fenetre))
 
 			if secondes < 30:
-				balle.Deplacer()
+				balle.Deplacer(hauteur, largeur, enemys, balle)
 			else:
-				balle.Deplacer2(perso)
+				if balle.pouvoir in [0, 2]:
+					balle.Deplacer2(perso)
+				else:
+					balle.Deplacer(hauteur, largeur, enemys, balle)
 
-			balle.Collisions(perso)
+
+			balle.Collisions(perso, enemys, balle)
 
 			if i - balle.apparition == 300:
 				enemys.remove(balle)
