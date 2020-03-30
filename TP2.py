@@ -11,7 +11,7 @@ largeur, hauteur = 1920, 1080
 fenetre = pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
 
 
-def images(font, font2):
+def images(font, font2, font3):
 	files = [
 		"imageFondJeu.jpg",
 		"imageFondM.jpg",
@@ -23,8 +23,11 @@ def images(font, font2):
 	]
 
 	bank = {file.split('.')[0]: pygame.image.load('images/' + file).convert_alpha() for file in files}
-	bank["play"] = font2.render("Play", 1, (255, 255, 255)).convert_alpha()
-	bank["exit"] = font2.render("Exit", 1, (255, 255, 255)).convert_alpha()		
+	bank["play"] = font2.render("Play", 1, (255, 0, 0)).convert_alpha()
+	bank["exit"] = font2.render("Exit", 1, (255, 0, 0)).convert_alpha()		
+	bank["Niveau 1"] = font2.render("Niveau 1", 1, (255, 0, 0)).convert_alpha()		
+	bank["Niveau 2"] = font2.render("Niveau 2", 1, (255, 0, 0)).convert_alpha()		
+	bank["souligné"] = font3.render("I", 1, (255, 0, 0)).convert_alpha()		
 	return bank
 
 class ElementGraphique():
@@ -99,16 +102,16 @@ class Enemys(ElementGraphique):
 		self.rect.x += self.vx
 		
 	def Deplacer2(self, perso):
-		if self.rect.x > perso.rect.x and self.vx > -5:
+		if self.rect.x > perso.rect.x and self.vx > -7:
 			self.vx -= 1
 
-		if self.rect.y > perso.rect.y and self.vy > -5:
+		if self.rect.y > perso.rect.y and self.vy > -7:
 			self.vy -= 1
 		
-		if self.rect.x < perso.rect.x and self.vx < 5:
+		if self.rect.x < perso.rect.x and self.vx < 7:
 			self.vx += 1
 
-		if self.rect.y < perso.rect.y and self.vy < 5:
+		if self.rect.y < perso.rect.y and self.vy < 7:
 			self.vy += 1
 
 		if self.rect.x == perso.rect.x:
@@ -147,7 +150,7 @@ def verif(saisie):
 			n = len([k for k in d if 'Unknown' in k])
 			d[f'Unknown {n+1}'] = secondes
 
-		elif saisie.get() not in d or secondes > d[saisie.get()]:
+		elif saisie.get() not in d or secondes > int(d[saisie.get()]):
 			d[saisie.get()] = secondes
 				
 		if secondes > d['Best score']:
@@ -159,8 +162,9 @@ def verif(saisie):
 	fen.destroy()
 
 font = pygame.font.Font(None, 30)
-font2 = pygame.font.Font(None, 100)
-bank = images(font, font2)
+font2 = pygame.font.Font("polices/airstrikeb3d.ttf", 100)
+font3 = pygame.font.Font("polices/Ornamentmix.ttf", 100)
+bank = images(font, font2, font3)
 
 fondjeu = ElementGraphique(bank["imageFondJeu"], 0, 0)
 fondmenu = ElementGraphique(bank["imageFondM"], 0, 0)
@@ -169,8 +173,12 @@ Play = ElementGraphique(bank["play"], largeur//2, hauteur//5)
 Play.rect.x -= Play.rect.w//2
 Exit = ElementGraphique(bank["exit"], largeur//2 ,3 * hauteur//5)
 Exit.rect.x -= Exit.rect.w//2
-
+Niv1 = ElementGraphique(bank["Niveau 1"], largeur//2 ,2 * hauteur//5)
+Niv1.rect.x -= Niv1.rect.w//2
+Niv2 = ElementGraphique(bank["Niveau 2"], largeur//2 ,2 * hauteur//5)
+Niv2.rect.x -= Niv2.rect.w//2
 horloge = pygame.time.Clock()
+
 
 i=0
 secondes = 0
@@ -180,7 +188,6 @@ state = "Menu"
 enemys = []
 
 xs, ys = 0, 0
-
 while continuer:
 	horloge.tick(30)
 	i+=1
@@ -204,6 +211,18 @@ while continuer:
 		Play.Afficher(fenetre)
 		Exit.Afficher(fenetre)
 
+		if select.colliderect(Play.rect):
+			Souligne = ElementGraphique(bank["souligné"], largeur//2, hauteur//5)
+			Souligne.rect.x -= Souligne.rect.w//2
+			Souligne.rect.y += 2*Souligne.rect.h//2
+			Souligne.Afficher(fenetre)
+
+		if select.colliderect(Exit.rect):
+			Souligne = ElementGraphique(bank["souligné"], largeur//2 ,3 * hauteur//5)
+			Souligne.rect.x -= Souligne.rect.w//2
+			Souligne.rect.y += 2*Souligne.rect.h//2
+			Souligne.Afficher(fenetre)	
+
 		for event in pygame.event.get():
 			if event.type == pygame.MOUSEMOTION:
 				xs = event.pos[0]
@@ -216,7 +235,6 @@ while continuer:
 			if select.colliderect(Exit.rect) and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 				continuer = False
 
-
 	if state == "Jeu":
 
 		imagevie = font.render("Vies: "+str(perso.vie), 1, (255, 255, 255))		
@@ -225,6 +243,7 @@ while continuer:
 		imagetemps = font.render("Secondes: "+str(secondes), 1, (255, 255, 255))
 		temps = ElementGraphique(imagetemps, 0,25)
 
+		
 		if i %60 == 0:
 			secondes += 1
 
@@ -242,13 +261,17 @@ while continuer:
 			if 0.85 <= nbr <= 1:
 				enemys.append(Enemys(bank["coeur"],randint(0, largeur), randint(0, hauteur), 3, randint(5, 15), i, randint(2, 5)))
 
-
 		fondjeu.Afficher((fenetre))
 		perso.Afficher((fenetre))
 		perso.Deplacer(touches, largeur, hauteur)
 		vie.Afficher(fenetre)
 		temps.Afficher(fenetre)
 
+		if 0 <= secondes <= 2:
+			Niv1.Afficher(fenetre)
+
+		if 30 <= secondes <= 32:
+			Niv2.Afficher(fenetre)			
 		if perso.enVie():
 			state = "Jeu"
 		
@@ -266,7 +289,6 @@ while continuer:
 			fen.mainloop()
 			pygame.display.set_mode((largeur,hauteur), flags = pygame.FULLSCREEN)
 
-
 		for balle in enemys:
 			balle.Afficher((fenetre))
 
@@ -277,7 +299,6 @@ while continuer:
 					balle.Deplacer2(perso)
 				else:
 					balle.Deplacer(hauteur, largeur, enemys, balle)
-
 
 			balle.Collisions(perso, enemys, balle)
 
