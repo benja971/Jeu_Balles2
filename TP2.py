@@ -1,5 +1,4 @@
-import pygame
-import json
+import pygame, json, os
 from tkinter import *
 from random import randint, random
 from ctypes import windll
@@ -29,6 +28,15 @@ def images(font, font2, font3):
 	bank["Niveau 2"] = font2.render("Niveau 2", 1, (255, 0, 0)).convert_alpha()		
 	bank["souligné"] = font3.render("I", 1, (255, 0, 0)).convert_alpha()		
 	return bank
+
+def getIMG(path):
+	d = {}
+	for f in os.listdir(path):
+		if len(f) > 4 and f[-4:] == '.jpg':
+			d[f[:-4]] = pygame.image.load(f'{path}/{f}')
+		else:
+			d[f] = getIMG(f'{path}/{f}')
+	return d
 
 class ElementGraphique():
 	# Le constructeur basique
@@ -161,10 +169,30 @@ def verif(saisie):
 
 	fen.destroy()
 
+
+def afficherGens(font, gens):
+	y = 0
+	with open('data.json') as f:
+		d = json.load(f)
+	
+	for i in d:
+		gens.append(font.render(i + ": " + str(d[i]), 1, (255, 255, 0)))
+
+	for i in gens:
+		r = i.get_rect()
+		r.x = largeur//2 - r.w//2
+		r.y = y
+		fenetre.blit(i, r)
+		y+=70
+
+	return True
+
+
 font = pygame.font.Font(None, 30)
 font2 = pygame.font.Font("polices/airstrikeb3d.ttf", 100)
 font3 = pygame.font.Font("polices/Ornamentmix.ttf", 100)
 bank = images(font, font2, font3)
+# Intro = getIMG("Intro")
 
 fondjeu = ElementGraphique(bank["imageFondJeu"], 0, 0)
 fondmenu = ElementGraphique(bank["imageFondM"], 0, 0)
@@ -182,12 +210,17 @@ horloge = pygame.time.Clock()
 
 i=0
 secondes = 0
-continuer = 1
+continuer = True
 state = "Menu"
+fait = False
+ideb = 0
 
 enemys = []
+gens = []
 
 xs, ys = 0, 0
+
+pygame.key.set_repeat(0, 0)
 while continuer:
 	horloge.tick(30)
 	i+=1
@@ -195,13 +228,22 @@ while continuer:
 	touches = pygame.key.get_pressed()
 
 	if touches[pygame.K_ESCAPE] :
-		continuer=0
+		continuer=False
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
-			continuer = 0
+			continuer = False
+
+	if state == "Intro":
+		for img in Intro:
+			img = ElementGraphique(Intro[str(img)], largeur//2, hauteur//2)
+			img.rect.x -= img.rect.w//2
+			img.rect.y -= img.rect.h//2
+			img.Afficher(fenetre)
+			print(i)
 
 	if state == "Menu":
+		fait = False
 		select = pygame.Rect(xs, ys, 1, 1)
 
 		perso.vie = 1
@@ -228,7 +270,6 @@ while continuer:
 				xs = event.pos[0]
 				ys = event.pos[1]
 
-
 			if select.colliderect(Play.rect) and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 				state = "Jeu"
 
@@ -237,10 +278,10 @@ while continuer:
 
 	if state == "Jeu":
 
-		imagevie = font.render("Vies: "+str(perso.vie), 1, (255, 255, 255))		
+		imagevie = font.render("Vies: "+ str(perso.vie), 1, (255, 255, 255))		
 		vie = ElementGraphique(imagevie, 0,5)
 
-		imagetemps = font.render("Secondes: "+str(secondes), 1, (255, 255, 255))
+		imagetemps = font.render("Secondes: "+ str(secondes), 1, (255, 255, 255))
 		temps = ElementGraphique(imagetemps, 0,25)
 
 		
@@ -260,6 +301,8 @@ while continuer:
 
 			if 0.85 <= nbr <= 1:
 				enemys.append(Enemys(bank["coeur"],randint(0, largeur), randint(0, hauteur), 3, randint(5, 15), i, randint(2, 5)))
+			# enemys.append(Enemys(bank["coeur"],randint(0, largeur), randint(0, hauteur), 3, randint(5, 15), i, randint(2, 5)))
+
 
 		fondjeu.Afficher((fenetre))
 		perso.Afficher((fenetre))
@@ -276,7 +319,9 @@ while continuer:
 			state = "Jeu"
 		
 		else:
-			state = "Menu"
+			ideb = i
+			state = "Gens"
+			enemys.clear()
 			pygame.display.set_mode((largeur,hauteur))
 
 			fen=Tk()
@@ -304,6 +349,13 @@ while continuer:
 
 			if i - balle.apparition == 300:
 				enemys.remove(balle)
+
+	if state == "Gens":
+		if not fait:
+			fait = afficherGens(font2, gens)
+
+		if i - ideb == 200:
+			state = "Menu"
 
 	pygame.display.update()
 
